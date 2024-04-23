@@ -4,7 +4,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from time import sleep
 
-notices = []
+notices = [] 
+
 
 def initialize_chrome_browser(options=None):
     options = options or webdriver.ChromeOptions()
