@@ -5,13 +5,10 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 import openai
+from api_gpt import resumir_noticia
+from get_g1 import get_g1_news
 
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return render_template('home.html')
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
+get_g1_news()
+texto_noticia = "Texto completo da notícia"  
+resumo = resumir_noticia(texto_noticia)
+print("Resumo:", resumo)
