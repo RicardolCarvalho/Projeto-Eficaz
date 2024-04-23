@@ -4,7 +4,6 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 import time
-import selenium
 import openai
 
 app = Flask(__name__)
@@ -38,7 +37,5 @@ def resumir_noticia(texto):
     )
     return response.choices[0].text
 
-if __name__ == '__main__':
-    app.run(debug=True)
 if __name__ == '__main__':
     app.run(debug=True)
