@@ -19,7 +19,7 @@ def initialize_chrome_browser(options=None):
         options=options) 
     return driver
 
-def main():
+def get_g1_news():
     driver = initialize_chrome_browser()
     driver.maximize_window()
     driver.get('https://g1.globo.com/')
@@ -46,5 +46,4 @@ def main():
 
     driver.quit()
 
-if __name__ == '__main__':
-    main()
+get_g1_news()
