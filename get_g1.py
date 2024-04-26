@@ -30,6 +30,8 @@ def get_g1_news():
         link = element.get_attribute('href')
         notices.append(link)
 
+    noticias = []
+
     for notice in notices:
         driver.get(notice)
         sleep(1)
@@ -38,15 +40,17 @@ def get_g1_news():
         content = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '.mc-article-body > article:nth-child(1)')))
         content_text = content.text
         date_element = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '.content-publication-data__updated')))
-        date_text = date_element.text
+        date_text = date_element.text [:10]
 
-        print('---' * 10)
-        print('Title:', title_text)
-        print('Date:', date_text[:10])
-        print('Content:', content_text)
+        noticias.append({
+            'titulo': title_text,
+            'conteudo': content_text,
+            'data': date_text
+        })
+
         driver.back()
         sleep(1)
 
     driver.quit()
 
-get_g1_news()
+    return noticias
