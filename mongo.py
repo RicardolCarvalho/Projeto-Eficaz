@@ -1,5 +1,6 @@
 from flask import Flask, request
 from flask_pymongo import PyMongo
+from api_gpt import post_todas_noticias
 
 app = Flask(__name__)
 
@@ -83,22 +84,8 @@ def get_news():
 
 @app.route('/noticias', methods=['POST'])
 def post_news():
-    data = request.json
-    if data['titulo'] == " " or data['titulo'] == "":
-        return {"erro": "título é obrigatório"}, 400
-    if data['data'] == " " or data['data'] == "":
-        return {"erro": "data é obrigatório"}, 400
-    if data['conteudo'] == " " or data['conteudo'] == "":
-        return {"erro": "conteúdo é obrigatório"}, 400
-    if data['tipo'] == " " or data['tipo'] == "":
-        return {"erro": "tipo é obrigatório"}, 400
+    post_todas_noticias()
     
-    idss = mongo.db.ids.find_one()
-    data['id'] = idss['id_news']
-    mongo.db.ids.update_one({}, {'$inc': {'id_news': 1}})
-    
-    result = mongo.db.noticias.insert_one(data)
-    return {"id": str(result.inserted_id)}, 201
 
 @app.route('/noticias/<id>', methods=['GET'])
 def get_new(id):

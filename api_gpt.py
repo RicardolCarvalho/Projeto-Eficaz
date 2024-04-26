@@ -82,3 +82,5 @@ def post_todas_noticias():
             "data": noticias[i]["data"],
             "tipo": tipos_noticia[i]
         })
+
+    return {"mensagem": "todas as notícias foram postadas"}, 201
