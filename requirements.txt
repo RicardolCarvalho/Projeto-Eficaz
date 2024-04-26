@@ -1,6 +1,6 @@
 flask
 selenium
-openai
+openai == 0.28
 webdriver_manager
 pymongo
 Flask-PyMongo
