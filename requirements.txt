@@ -2,3 +2,5 @@ flask
 selenium
 openai
 webdriver_manager
+pymongo
+Flask-PyMongo
