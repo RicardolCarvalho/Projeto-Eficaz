@@ -41,7 +41,7 @@ def safe_api_call(call_function, *args, **kwargs):
 
 
 def resume_noticias(noticia):
-    openai.api_key = 'sk-proj-hVolc42cBbLZTfWxOrrBT3BlbkFJzK7UUwhAXYBLyBtUHfnU'
+    openai.api_key = ''
     noticias_resumidas = []
     for i in range(len(noticia)):
         messages = [
@@ -56,7 +56,7 @@ def resume_noticias(noticia):
 
 
 def categoriza_noticia(noticia):
-    openai.api_key = 'sk-proj-hVolc42cBbLZTfWxOrrBT3BlbkFJzK7UUwhAXYBLyBtUHfnU'
+    openai.api_key = ''
     tipo_noticia = []
     for i in range(len(noticia)):
         messages = [
