@@ -1,6 +1,5 @@
 from flask import Flask, request
 from flask_pymongo import PyMongo
-from get_g1 import get_g1_news
 
 app = Flask(__name__)
 
@@ -29,9 +28,9 @@ def post_users():
     if data['cpf'] == " " or data['cpf'] == "":
         return {"erro": "cpf é obrigatório"}, 400
     
-    id_users = mongo.db.ids.find_one('id_user')
-    data['id'] = id_users['id_user']
-    mongo.db.ids.update_one({'_id': 'id_user'}, {'$inc': {'id_user': 1}})
+    idss = mongo.db.ids.find_one()
+    data['id'] = idss['id_user']
+    mongo.db.ids.update_one({}, {'$inc': {'id_user': 1}})
     
     dados_user = mongo.db.usuarios.find(filtro, projecao)
     lista_user = list(dados_user)
@@ -94,9 +93,9 @@ def post_news():
     if data['tipo'] == " " or data['tipo'] == "":
         return {"erro": "tipo é obrigatório"}, 400
     
-    id_newss = mongo.db.ids.find_one('id_news')
-    data['id'] = id_newss['id_news']
-    mongo.db.ids.update_one({'_id': 'id_news'}, {'$inc': {'id_news': 1}})
+    idss = mongo.db.ids.find_one()
+    data['id'] = idss['id_news']
+    mongo.db.ids.update_one({}, {'$inc': {'id_news': 1}})
     
     result = mongo.db.noticias.insert_one(data)
     return {"id": str(result.inserted_id)}, 201
