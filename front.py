@@ -1,7 +1,7 @@
 import streamlit as st
 import requests as rq
 
-URL = ""
+URL = "http://127.0.0.1:5000"
 
 def tela_login():
     st.title("Tela Login")
@@ -22,13 +22,14 @@ def usuario_login():
             st.session_state['usuario'] = r.json()['usuario']
         else:
             st.error('Email ou senha inválidos')
+
         
 def meus_usuarios():
     st.title("Meus Usuários")
     r = rq.get(f'{URL}/usuarios')
     status = r.status_code
     if status == 200:
-        st.table(r.json())
+        st.table(r.json()["usuarios"])
 
 def novo_usuario():
     st.title("Novo Usuário")
@@ -64,15 +65,85 @@ def dados_usuario():
 
 
 
+def home():
+
+    r = rq.get(f'{URL}/noticias')  
+
+    if r.status_code == 200:
+        resposta_json = r.json()
+        
+        noticias = resposta_json["noticias"]
+
+        for noticia in noticias:
+            st.title(noticia['titulo'])
+            st.write ("\n")
+            st.write ("\n")
+            st.write(noticia['tipo'])
+            st.write ("\n")
+            st.write(noticia['conteudo'])
+            st.write ("\n")
+            st.write(noticia['data'])
+            st.write("-------------------------------------------------")
+
+
+
+def atualiza_noticias():
+
+    st.button('Atualizar Notícias')
+
+    if st.button('Atualizar Notícias'):
+        r = rq.post(f'{URL}/noticias')  
+
+        if r.status_code == 200 or 201:
+            st.success('Notícias atualizadas com sucesso')
+
+        else:
+            st.error('Erro ao atualizar notícias')
+
+
+
+def edita_noticias():
+    st.title("Editar Notícias")
+    id = st.text_input('Titulo da notícia')
+    if st.button('Buscar Notícia'):
+        r = rq.get(f'{URL}/noticia/{id}')
+        st.session_state['Noticia'] = r.json()
+
+    if 'Noticia' in st.session_state:
+        titulo = st.text_input("Titulo")
+        conteudo = st.text_input("Conteudo")
+        tipo = st.text_input("Tipo")
+
+        if st.button('Atualizar Notícia'):
+            r = rq.put(f'{URL}/noticias/{id}', json={"titulo": titulo, "conteudo": conteudo, "tipo": tipo})
+
+            if r.status_code == 200 or 204:
+                st.success('Notícia atualizada com sucesso')
+
+            else:
+                st.error('Erro ao atualizar notícia')
+        if st.button('Apagar Notícia'):
+            r = rq.delete(f'{URL}/noticias/{id}')
+            if r.status_code == 200 or 204:
+                st.success('Usuário apagado com sucesso')
+            else:
+                st.error('Erro ao apagar notícia')
+
+
+
 if __name__ == "__main__":
     st.sidebar.subheader("Menu")
-    opcao = st.sidebar.radio("", ["Tela inicial", "Meus Usuários", "Novo Usuário", "Dados Usuário"])
+    opcao = st.sidebar.radio("", ["Home", "Meus Usuários", "Novo Usuário", "Dados Usuário", "Atualizar Notícias", "Editar Notícias"])
 
-    if opcao == "Tela inicial":
-        tela_inicial()
+    if opcao == "Home":
+        home()
     elif opcao == "Meus Usuários":
         meus_usuarios()
     elif opcao == "Novo Usuário":
         novo_usuario()
     elif opcao == "Dados Usuário":
         dados_usuario()
+    elif opcao == "Atualizar Notícias":
+        atualiza_noticias()
+    elif opcao == "Editar Notícias":
+        edita_noticias()

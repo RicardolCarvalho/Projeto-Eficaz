@@ -5,7 +5,7 @@ from api_gpt import post_todas_noticias
 app = Flask(__name__)
 
 app.config["MONGO_URI"] = "mongodb+srv://admin:admin@projeficaz.fsc9tus.mongodb.net/TGproj"
-mongo = PyMongo(app)
+mongo = PyMongo(app, tlsAllowInvalidCertificates=True, tls=True)
 
 @app.route('/usuarios', methods=['GET'])
 def get_users():    
@@ -52,7 +52,7 @@ def get_user(id):
 @app.route('/usuarios/<id>', methods=['PUT'])
 def put_user(id):
     filtro = {"id":id}
-    projecao = {"_id": 0}
+    projecao = {"_id": 0} 
     data = request.json
     usuario_existente = mongo.db.usuarios.find_one(filtro, projecao)
     if usuario_existente is None:
@@ -105,6 +105,18 @@ def delete_new(id):
         mongo.db.noticias.delete_one(filtro)
     
     return {"mensagem": "notícia deletada com sucesso"}, 200
+
+
+@app.route('/noticias/<int:id>', methods=['PUT'])
+def put_new(id):
+    filtro = {"id":id}
+    projecao = {"_id": 0} 
+    data = request.json
+    noticia_existente = mongo.db.noticias.find_one(filtro, projecao)
+    if noticia_existente is None:
+        return {"erro": "notícia não encontrada"}, 404
+    mongo.db.noticias.update_one(filtro, {"$set": data})
+    return {"mensagem": "alteração realizada com sucesso"}, 200
 
 if __name__ == '__main__':
     app.run(debug=True)
