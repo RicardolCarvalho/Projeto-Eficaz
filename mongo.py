@@ -1,12 +1,32 @@
-from flask import Flask, request
+from flask import Flask, request, Response
 from flask_pymongo import PyMongo
 from api_gpt import post_todas_noticias
 from urllib.parse import unquote
+from login import hash_password, requires_auth
 
 app = Flask(__name__)
-
 app.config["MONGO_URI"] = "mongodb+srv://admin:admin@projeficaz.fsc9tus.mongodb.net/TGproj"
 mongo = PyMongo(app, tlsAllowInvalidCertificates=True, tls=True)
+
+@app.route('/')
+def home():
+    return {"msg": 'rota publica'}
+
+@app.route('/secret')
+@requires_auth
+def secret():
+    return {"msg": 'rota secreta'}
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    filtro = {'email': data['email'], 'senha': data['senha']}
+    projecao = {'_id': 0}
+    usuario = mongo.db.usuarios.find_one(filtro, projecao)
+    if usuario is None:
+        return {"erro": "usuário e/ou senha inválidos"}, 400
+    return {"id": usuario['id']}, 200
 
 @app.route('/usuarios', methods=['GET'])
 def get_users():    
@@ -39,8 +59,11 @@ def post_users():
     for user in lista_user:
         if data['cpf'] == user['cpf']:
             return {"erro": "cpf já cadastrado"}, 400
+        
+    hashed_password = hash_password(data['senha'])
+    user_data = {'id': data['id'], 'nome': data['nome'], 'email': data['email'], 'senha': hashed_password, 'cpf': data['cpf']}
 
-    result = mongo.db.usuarios.insert_one(data)
+    result = mongo.db.usuarios.insert_one(user_data)
     return {"id": str(result.inserted_id)}, 201
 
 @app.route('/usuarios/<id>', methods=['GET'])
