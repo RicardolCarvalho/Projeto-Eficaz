@@ -1,27 +1,35 @@
 import streamlit as st
 import requests as rq
 
-URL = ""
+URL = "http://127.0.0.1:5000"  # Corrigi o formato da URL para incluir o protocolo HTTP
 
 def tela_login():
-    st.title("Tela Login")
-    if st.button('Entrar'):
+    st.title("Login")
+    opcao = st.radio("", ['Entrar', 'Cadastrar'])
+    if opcao == 'Entrar':
         usuario_login()
-    if st.button('Cadastrar'):
+    elif opcao == 'Cadastrar':
         novo_usuario()
 
 def usuario_login():
-    st.title("Login")
-    email = st.text_input("Email")
+    st.title("Entrar")
+    cpf = st.text_input("CPF")
     senha = st.text_input("Senha", type="password")
     if st.button('Login'):
-        r = rq.post(f'{URL}/login', json={"email": email, "senha": senha})
+        r = rq.get(f'{URL}/usuarios')
+        response_json = r.json()
         if r.status_code == 200:
-            st.success('Login efetuado com sucesso')
-            st.session_state['token'] = r.json()['token']
-            st.session_state['usuario'] = r.json()['usuario']
-        else:
-            st.error('Email ou senha inválidos')
+            for usuario in response_json['usuarios']:
+                if usuario['cpf'] == cpf:
+                    if usuario['senha'] == senha:
+                        st.success('Redirecionar para tela home')
+                        break
+                    else:
+                        st.error('Senha inválida')
+                        break
+                else:
+                    st.error('CPF não encontrado')
+                    break
         
 def meus_usuarios():
     st.title("Meus Usuários")
@@ -31,20 +39,20 @@ def meus_usuarios():
         st.table(r.json())
 
 def novo_usuario():
-    st.title("Novo Usuário")
+    st.title("Cadastrar")
     cpf = st.text_input("CPF")
     email = st.text_input("Email")
     nome = st.text_input("Nome")
     senha = st.text_input("Senha", type="password")
-    if st.button('Cadastrar'):
+    if st.button('Criar Usuário'):
         r = rq.post(f'{URL}/usuarios', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
         if r.status_code == 201:
-            st.success('Usuário cadastrado com sucesso')
+            st.success('Redirecionar para tela home')
         
 def dados_usuario():
     st.title("Dados Usuário")
-    id = st.text_input('Id do usuario')
-    if st.button('Buscar Usuario'):
+    id = st.text_input('Id do usuário')
+    if st.button('Buscar Usuário'):
         r = rq.get(f'{URL}/usuarios/{id}')
         st.table(r.json())
         st.session_state['Usuario'] = r.json()
@@ -53,26 +61,18 @@ def dados_usuario():
         email = st.text_input("Email")
         nome = st.text_input("Nome")
         senha = st.text_input("Senha", type="password")
-        if st.button('Atualizar Usuario'):
+        if st.button('Atualizar Usuário'):
             r = rq.put(f'{URL}/usuarios/{id}', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
             if r.status_code == 200:
                 st.success('Usuário atualizado com sucesso')
-        if st.button('Apagar Usuario'):
+        if st.button('Apagar Usuário'):
             r = rq.delete(f'{URL}/usuarios/{id}')
             if r.status_code == 204:
                 st.success('Usuário apagado com sucesso')
 
-
-
 if __name__ == "__main__":
-    st.sidebar.subheader("Menu")
-    opcao = st.sidebar.radio("", ["Tela inicial", "Meus Usuários", "Novo Usuário", "Dados Usuário"])
-
-    if opcao == "Tela inicial":
-        tela_inicial()
-    elif opcao == "Meus Usuários":
+    tela_login()
+    if 'token' in st.session_state:
         meus_usuarios()
-    elif opcao == "Novo Usuário":
         novo_usuario()
-    elif opcao == "Dados Usuário":
         dados_usuario()
