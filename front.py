@@ -25,7 +25,7 @@ def usuario_login():
 
         
 def meus_usuarios():
-    st.title("Meus Usuários")
+    st.title("Usuários")
     r = rq.get(f'{URL}/usuarios')
     status = r.status_code
     if status == 200:
@@ -35,7 +35,7 @@ def novo_usuario():
     st.title("Novo Usuário")
     cpf = st.text_input("CPF")
     email = st.text_input("Email")
-    nome = st.text_input("Nome")
+    nome = st.text_input("Nome") 
     senha = st.text_input("Senha", type="password")
     if st.button('Cadastrar'):
         r = rq.post(f'{URL}/usuarios', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
@@ -65,6 +65,8 @@ def dados_usuario():
 
 
 
+#______________________________________________________
+
 def home():
     r = rq.get(f'{URL}/noticias')  
 
@@ -73,22 +75,22 @@ def home():
         
         noticias = resposta_json["noticias"]
 
+        tipos = list(set(noticia['tipo'] for noticia in noticias)) 
+        tipo_selecionado = st.selectbox('Filtrar por tipo de notícia:', ['Todos'] + tipos)
+
         for noticia in noticias:
-            st.title(noticia['titulo'])
-            st.write ("\n")
-            st.write ("\n")
-            st.write(noticia['tipo'])
-            st.write ("\n")
-            st.write(noticia['conteudo'])
-            st.write ("\n")
-            st.write(noticia['data'])
-            st.write("-------------------------------------------------")
+            if tipo_selecionado == 'Todos' or noticia['tipo'] == tipo_selecionado:
+                st.title(noticia['titulo'])
+                st.write(noticia['tipo'])
+                st.write(noticia['conteudo'])
+                st.write(noticia['data'])
+                st.write("-------------------------------------------------")
 
 
 
 def atualiza_noticias():
 
-    st.title('Atualizar Notícias')
+    st.title('Atualizar Notícias Diárias')
 
 
     if st.button('Atualizar'):
@@ -117,7 +119,7 @@ def edita_noticias():
             try:
                 r = rq.get(f'{URL}/noticias/{titulo_noticia}')
                 if r.status_code == 200:
-                    st.session_state['noticia'] = r.json()["noticias"]
+                    st.session_state['noticia'] = r.json()
 
                 else:
                     st.error('Notícia não encontrada.')
@@ -137,10 +139,10 @@ def edita_noticias():
             
             if atualizar_button:
                 try:
-                    update_response = rq.put(f'{URL}/noticia/{titulo_noticia}', json={
+                    update_response = rq.put(f'{URL}/noticias/{titulo_noticia}', json={
                         'titulo': novo_titulo,
                         'tipo': novo_tipo,
-                        'conteudo': novo_conteudo
+                        'conteudo': novo_conteudo, 
                     })
 
 
@@ -177,17 +179,17 @@ def edita_noticias():
 
 if __name__ == "__main__":
     st.sidebar.subheader("Menu")
-    opcao = st.sidebar.radio("", ["Home", "Meus Usuários", "Novo Usuário", "Dados Usuário", "Atualizar Notícias", "Editar Notícias"])
+    opcao = st.sidebar.radio("", ["Home", "Usuários", "Novo Usuário", "Dados Usuário", "Editar Notícias",  "Atualizar Notícias Diárias"])
 
     if opcao == "Home":
         home()
-    elif opcao == "Meus Usuários":
+    elif opcao == "Usuários":
         meus_usuarios()
     elif opcao == "Novo Usuário":
         novo_usuario()
     elif opcao == "Dados Usuário":
         dados_usuario()
-    elif opcao == "Atualizar Notícias":
+    elif opcao == "Atualizar Notícias Diárias":
         atualiza_noticias()
     elif opcao == "Editar Notícias":
         edita_noticias()

@@ -45,7 +45,7 @@ def get_g1_news():
         noticias.append({
             'titulo': title_text,
             'conteudo': content_text,
-            'data': date_text
+            'data': date_text,
         })
 
         driver.back()
