@@ -175,21 +175,18 @@ def edita_noticias():
             except Exception as e:
                 st.error(f'Erro ao remover notícia: {e}')
 
+if __name__ == '__main__':
+    st.session_state['token'] = None
+    st.session_state['usuario'] = None
+    st.session_state['noticia'] = None
 
-
-if __name__ == "__main__":
-    st.sidebar.subheader("Menu")
-    opcao = st.sidebar.radio("", ["Home", "Usuários", "Novo Usuário", "Dados Usuário", "Editar Notícias",  "Atualizar Notícias Diárias"])
-
-    if opcao == "Home":
-        home()
-    elif opcao == "Usuários":
+    if st.session_state['token'] is None:
+        tela_login()
+    else:
+        st.title("Bem-vindo")
+        st.write(f'Logado como {st.session_state["usuario"]["nome"]}')
         meus_usuarios()
-    elif opcao == "Novo Usuário":
-        novo_usuario()
-    elif opcao == "Dados Usuário":
         dados_usuario()
-    elif opcao == "Atualizar Notícias Diárias":
+        home()
         atualiza_noticias()
-    elif opcao == "Editar Notícias":
         edita_noticias()
