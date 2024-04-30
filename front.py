@@ -66,7 +66,6 @@ def dados_usuario():
 
 
 def home():
-
     r = rq.get(f'{URL}/noticias')  
 
     if r.status_code == 200:
@@ -89,9 +88,10 @@ def home():
 
 def atualiza_noticias():
 
-    st.button('Atualizar Notícias')
+    st.title('Atualizar Notícias')
 
-    if st.button('Atualizar Notícias'):
+
+    if st.button('Atualizar'):
         r = rq.post(f'{URL}/noticias')  
 
         if r.status_code == 200 or 201:
@@ -102,32 +102,76 @@ def atualiza_noticias():
 
 
 
+
 def edita_noticias():
-    st.title("Editar Notícias")
-    id = st.text_input('Titulo da notícia')
-    if st.button('Buscar Notícia'):
-        r = rq.get(f'{URL}/noticia/{id}')
-        st.session_state['Noticia'] = r.json()
+    st.title('Editar Notícias')
+    
+    if 'noticia' not in st.session_state:
+        st.session_state['noticia'] = None
+    
+    titulo_noticia = st.text_input('Título da notícia', key='titulo_noticia')
 
-    if 'Noticia' in st.session_state:
-        titulo = st.text_input("Titulo")
-        conteudo = st.text_input("Conteudo")
-        tipo = st.text_input("Tipo")
+    
+    if st.button('Buscar'):
+        if titulo_noticia:
+            try:
+                r = rq.get(f'{URL}/noticias/{titulo_noticia}')
+                if r.status_code == 200:
+                    st.session_state['noticia'] = r.json()["noticias"]
 
-        if st.button('Atualizar Notícia'):
-            r = rq.put(f'{URL}/noticias/{id}', json={"titulo": titulo, "conteudo": conteudo, "tipo": tipo})
+                else:
+                    st.error('Notícia não encontrada.')
+                    st.session_state['noticia'] = None
+            except Exception as e:
+                st.error(f'Erro ao buscar notícia: {e}')
+                st.session_state['noticia'] = None
 
-            if r.status_code == 200 or 204:
-                st.success('Notícia atualizada com sucesso')
+    if st.session_state['noticia']:
+        with st.form("form_atualizar_noticia"):
+       
+            novo_titulo = st.text_input('Título', value=st.session_state['noticia']['titulo'])
+            novo_tipo = st.text_input('Tipo', value=st.session_state['noticia']['tipo'])
+            novo_conteudo = st.text_area('Conteúdo', value=st.session_state['noticia']['conteudo'])
 
-            else:
-                st.error('Erro ao atualizar notícia')
-        if st.button('Apagar Notícia'):
-            r = rq.delete(f'{URL}/noticias/{id}')
-            if r.status_code == 200 or 204:
-                st.success('Usuário apagado com sucesso')
-            else:
-                st.error('Erro ao apagar notícia')
+            atualizar_button = st.form_submit_button('Atualizar Notícia')
+            
+            if atualizar_button:
+                try:
+                    update_response = rq.put(f'{URL}/noticia/{titulo_noticia}', json={
+                        'titulo': novo_titulo,
+                        'tipo': novo_tipo,
+                        'conteudo': novo_conteudo
+                    })
+
+
+
+                    if update_response.status_code in [200, 204]:
+                        st.success('Notícia atualizada com sucesso!')
+        
+                        st.session_state['noticia']['titulo'] = novo_titulo
+                        st.session_state['noticia']['conteudo'] = novo_conteudo
+                        st.session_state['noticia']['tipo'] = novo_tipo
+                    else:
+                        st.error('Falha ao atualizar notícia.')
+                except Exception as e:
+                    st.error(f'Erro ao atualizar notícia: {e}')
+
+
+
+        if st.button('Remover Notícia'):
+            try:
+                
+                delete_response = rq.delete(f'{URL}/noticias/{titulo_noticia}')
+
+                if delete_response.status_code in [200, 204]:
+                    st.success('Notícia removida com sucesso!')
+                    st.session_state['noticia'] = None
+                
+                else:
+                    st.error('Falha ao remover notícia.')
+
+            except Exception as e:
+                st.error(f'Erro ao remover notícia: {e}')
 
 
 

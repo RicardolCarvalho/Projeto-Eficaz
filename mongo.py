@@ -1,6 +1,7 @@
 from flask import Flask, request
 from flask_pymongo import PyMongo
 from api_gpt import post_todas_noticias
+from urllib.parse import unquote
 
 app = Flask(__name__)
 
@@ -87,16 +88,18 @@ def post_news():
     post_todas_noticias()
     
 
-@app.route('/noticias/<id>', methods=['GET'])
-def get_new(id):
+@app.route('/noticias/<titulo>', methods=['GET'])
+def get_new(titulo):
+    titulo = unquote(titulo)
     filtro = {'id': id}
     projecao = {'_id': 0}
     dados_news = mongo.db.noticias.find_one(filtro, projecao)
     return dados_news, 200
 
-@app.route('/noticias/<id>', methods=['DELETE'])
-def delete_new(id):
-    filtro ={"id": id}
+@app.route('/noticias/<titulo>', methods=['DELETE'])
+def delete_new(titulo):
+    titulo = unquote(titulo)
+    filtro ={"titulo": titulo}
     projecao = {'_id': 0}
     noticia_existente = mongo.db.noticias.find_one(filtro, projecao)
     if noticia_existente is None:
@@ -107,14 +110,19 @@ def delete_new(id):
     return {"mensagem": "notícia deletada com sucesso"}, 200
 
 
-@app.route('/noticias/<int:id>', methods=['PUT'])
-def put_new(id):
-    filtro = {"id":id}
+@app.route('/noticias/<titulo>', methods=['PUT'])
+def put_new(titulo):
+
+    titulo = unquote(titulo)
+    filtro = {"titulo": titulo}    
     projecao = {"_id": 0} 
     data = request.json
+
+
     noticia_existente = mongo.db.noticias.find_one(filtro, projecao)
     if noticia_existente is None:
         return {"erro": "notícia não encontrada"}, 404
+    
     mongo.db.noticias.update_one(filtro, {"$set": data})
     return {"mensagem": "alteração realizada com sucesso"}, 200
 
