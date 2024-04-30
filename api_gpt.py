@@ -16,7 +16,7 @@ def post_noticias(data):
         return {"erro": "data é obrigatória"}, 400
     
     if data["titulo"] in [noticia["titulo"] for noticia in db.noticias.find()]:
-        return {"erro": "noticia já cadastrado"}, 400
+        return {"erro": "noticia já cadastrada"}, 400
     
     id_noticias = db.ids.find_one()
     data['id'] = id_noticias['id_news']
@@ -64,7 +64,7 @@ def categoriza_noticia(noticia):
     for i in range(len(noticia)):
         messages = [
             {"role": "system", "content": "Você é um assistente que categoriza notícias."},
-            {"role": "user", "content": noticia[i]["conteudo"] + " Categorize esta notícia em uma das seguintes categorias: Política, Economia, Esportes, Entretenimento, Mundo. Mesmo que não se encaixe em nenhuma das categorias, escolha a que mais se aproxima. Não explique sua escolha apenas escolha uma das categorias. Sua resposta deve conter apenas uma palavra"}
+            {"role": "user", "content": noticia[i]["conteudo"] + " Categorize esta notícia em uma das seguintes categorias: Política, Economia, Esportes, Entretenimento, Mundo, Saúde, Cidade. Mesmo que não se encaixe em nenhuma das categorias, escolha a que mais se aproxima. Não explique sua escolha apenas escolha uma das categorias. Sua resposta deve conter apenas uma palavra"}
         ]
         response = safe_api_call(openai.ChatCompletion.create, model="gpt-3.5-turbo", messages=messages, max_tokens=50)
         tipo_noticia.append(response['choices'][0]['message']['content'].strip())
@@ -83,7 +83,7 @@ def post_todas_noticias():
             "titulo": noticias[i]["titulo"],
             "conteudo": noticias_resumidas[i],
             "data": noticias[i]["data"],
-            "tipo": tipos_noticia[i]
+            "tipo": tipos_noticia[i],
         })
 
     return {"mensagem": "todas as notícias foram postadas"}, 201

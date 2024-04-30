@@ -114,7 +114,7 @@ def post_news():
 @app.route('/noticias/<titulo>', methods=['GET'])
 def get_new(titulo):
     titulo = unquote(titulo)
-    filtro = {'id': id}
+    filtro = {'titulo': titulo}
     projecao = {'_id': 0}
     dados_news = mongo.db.noticias.find_one(filtro, projecao)
     return dados_news, 200
@@ -143,6 +143,8 @@ def put_new(titulo):
 
 
     noticia_existente = mongo.db.noticias.find_one(filtro, projecao)
+
+
     if noticia_existente is None:
         return {"erro": "notícia não encontrada"}, 404
     
