@@ -1,5 +1,6 @@
 import streamlit as st
 import requests as rq
+from urllib.parse import urlencode
 
 URL = "http://127.0.0.1:5000"  # Corrigi o formato da URL para incluir o protocolo HTTP
 
@@ -22,14 +23,15 @@ def usuario_login():
             for usuario in response_json['usuarios']:
                 if usuario['cpf'] == cpf:
                     if usuario['senha'] == senha:
-                        st.success('Redirecionar para tela home')
+                        st.query_params['page'] = 'home'  # Redirecionar para a tela home
+                        print('CWFEB,ERKOJNVWOQSVNEOBSWRINBOWRNOBLMWESAOVNMWEONBOW4TEK NBOEQN B OQWRNEBOEQWNBOWE OQN O')
                         break
                     else:
                         st.error('Senha inválida')
                         break
-                else:
-                    st.error('CPF não encontrado')
-                    break
+            else:
+                st.error('CPF não encontrado')
+                
 
 def meus_usuarios():
     st.title("Meus Usuários")
@@ -47,7 +49,9 @@ def novo_usuario():
     if st.button('Criar Usuário'):
         r = rq.post(f'{URL}/usuarios', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
         if r.status_code == 201:
-            st.success('Redirecionar para tela home')
+            st.query_params['page'] = 'home'  # Redirecionar para a tela home após o sucesso do cadastro
+            print('CWFEB,ERKOJNVWOQSVNEOBSWRINBOWRNOBLMWESAOVNMWEONBOW4TEK NBOEQN B OQWRNEBOEQWNBOWE OQN O')
+
 
 def dados_usuario():
     st.title("Dados Usuário")
@@ -70,8 +74,6 @@ def dados_usuario():
             if r.status_code == 204:
                 st.success('Usuário apagado com sucesso')
 
-
-
 #______________________________________________________
 
 def home():
@@ -93,24 +95,16 @@ def home():
                 st.write(noticia['data'])
                 st.write("-------------------------------------------------")
 
-
-
 def atualiza_noticias():
-
     st.title('Atualizar Notícias Diárias')
-
 
     if st.button('Atualizar'):
         r = rq.post(f'{URL}/noticias')  
 
         if r.status_code == 200 or 201:
             st.success('Notícias atualizadas com sucesso')
-
         else:
             st.error('Erro ao atualizar notícias')
-
-
-
 
 def edita_noticias():
     st.title('Editar Notícias')
@@ -120,7 +114,6 @@ def edita_noticias():
     
     titulo_noticia = st.text_input('Título da notícia', key='titulo_noticia')
 
-    
     if st.button('Buscar'):
         if titulo_noticia:
             try:
@@ -152,8 +145,6 @@ def edita_noticias():
                         'conteudo': novo_conteudo, 
                     })
 
-
-
                     if update_response.status_code in [200, 204]:
                         st.success('Notícia atualizada com sucesso!')
         
@@ -164,8 +155,6 @@ def edita_noticias():
                         st.error('Falha ao atualizar notícia.')
                 except Exception as e:
                     st.error(f'Erro ao atualizar notícia: {e}')
-
-
 
         if st.button('Remover Notícia'):
             try:
@@ -183,7 +172,14 @@ def edita_noticias():
                 st.error(f'Erro ao remover notícia: {e}')
 
 if __name__ == "__main__":
-    tela_login()
+    st.query_params['page'] = 'login'
+    if 'page' in st.query_params:
+        if st.query_params['page'] == 'login':
+            tela_login()
+        elif st.query_params['page'] == 'home':
+            home()
+    else:   
+        tela_login()
     if 'token' in st.session_state:
         meus_usuarios()
         novo_usuario()
@@ -191,3 +187,6 @@ if __name__ == "__main__":
         atualiza_noticias()
         edita_noticias()
         home()
+    elif 'page' in st.query_params:
+        if st.query_params['page'] == 'home':
+            home()
