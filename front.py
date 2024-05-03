@@ -2,7 +2,7 @@ import streamlit as st
 import requests as rq
 from urllib.parse import urlencode
 
-URL = "http://127.0.0.1:5000"  # Corrigi o formato da URL para incluir o protocolo HTTP
+URL = "http://127.0.0.1:5000"  
 
 def tela_login():
     st.title("Login")
@@ -21,24 +21,19 @@ def usuario_login():
         response_json = r.json()
         if r.status_code == 200:
             for usuario in response_json['usuarios']:
-                if usuario['cpf'] == cpf:
-                    if usuario['senha'] == senha:
-                        st.query_params['page'] = 'home'  # Redirecionar para a tela home
-                        print('CWFEB,ERKOJNVWOQSVNEOBSWRINBOWRNOBLMWESAOVNMWEONBOW4TEK NBOEQN B OQWRNEBOEQWNBOWE OQN O')
-                        break
-                    else:
-                        st.error('Senha inválida')
-                        break
+                if usuario['cpf'] == cpf and usuario['senha'] == senha:
+                    st.success('Login efetuado com sucesso')
             else:
-                st.error('CPF não encontrado')
+                st.error('CPF ou senha inválidos')
+
                 
 
 def meus_usuarios():
-    st.title("Meus Usuários")
+    st.title("Usuários")
     r = rq.get(f'{URL}/usuarios')
     status = r.status_code
     if status == 200:
-        st.table(r.json())
+        st.table(r.json()["usuarios"])
 
 def novo_usuario():
     st.title("Cadastrar")
@@ -49,8 +44,7 @@ def novo_usuario():
     if st.button('Criar Usuário'):
         r = rq.post(f'{URL}/usuarios', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
         if r.status_code == 201:
-            st.query_params['page'] = 'home'  # Redirecionar para a tela home após o sucesso do cadastro
-            print('CWFEB,ERKOJNVWOQSVNEOBSWRINBOWRNOBLMWESAOVNMWEONBOW4TEK NBOEQN B OQWRNEBOEQWNBOWE OQN O')
+            st.success('Usuário criado com sucesso')
 
 
 def dados_usuario():
@@ -171,22 +165,23 @@ def edita_noticias():
             except Exception as e:
                 st.error(f'Erro ao remover notícia: {e}')
 
-if __name__ == "__main__":
-    st.query_params['page'] = 'login'
-    if 'page' in st.query_params:
-        if st.query_params['page'] == 'login':
-            tela_login()
-        elif st.query_params['page'] == 'home':
-            home()
-    else:   
-        tela_login()
-    if 'token' in st.session_state:
-        meus_usuarios()
-        novo_usuario()
-        dados_usuario()
-        atualiza_noticias()
-        edita_noticias()
-        home()
-    elif 'page' in st.query_params:
-        if st.query_params['page'] == 'home':
-            home()
+
+
+st.sidebar.title("Menu")
+page = st.sidebar.radio("", ('Home', "Login", "Usuários", "Editar Notícias", "Atualizar Notícias"))
+
+if page == 'Home':
+    home()
+
+elif page == 'Login':
+    tela_login()
+
+elif page == 'Usuários':   
+    meus_usuarios()
+
+elif page == 'Editar Notícias':
+    edita_noticias()
+
+
+elif page == 'Atualizar Notícias':
+    atualiza_noticias()
