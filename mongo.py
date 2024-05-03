@@ -1,6 +1,7 @@
 from flask import Flask, request, Response, jsonify, g
 from flask_pymongo import PyMongo
-from api_gpt import post_todas_noticias
+from api_gpt_g1 import post_todas_noticias
+from api_gpt_uol import post_todas_noticias_2
 from urllib.parse import unquote
 from functools import wraps
 import jwt as jwt_lib 
@@ -137,8 +138,8 @@ def get_news():
 @app.route('/noticias', methods=['POST'])
 def post_news():
     post_todas_noticias()
-
-
+    post_todas_noticias_2()
+  
 @app.route('/noticias/<titulo>', methods=['GET'])
 def get_new(titulo):
     titulo = unquote(titulo)

@@ -58,6 +58,7 @@ def busca_noticias(lista_css):
     return lista_textos
 
 def processar_textos(lista_textos):
+
     session = requests.Session()
     id_modelo = 'gpt-3.5-turbo'
     link = 'https://api.openai.com/v1/chat/completions'
@@ -108,11 +109,7 @@ def post_todas_noticias_2():
             "conteudo": resultados[i]["resumo"],
             "data": resultados[i]["data"],
             "tipo": resultados[i]["genero"],
+            "portal" : "UOL"
         })
 
     return {"mensagem": "todas as notícias foram postadas"}, 201
-
-print(post_todas_noticias_2())
-
-
-

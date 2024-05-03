@@ -84,6 +84,7 @@ def post_todas_noticias():
             "conteudo": noticias_resumidas[i],
             "data": noticias[i]["data"],
             "tipo": tipos_noticia[i],
+            "portal" : "G1"
         })
 
     return {"mensagem": "todas as notícias foram postadas"}, 201
