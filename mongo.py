@@ -1,6 +1,7 @@
 from flask import Flask, request, Response
 from flask_pymongo import PyMongo
-from api_gpt import post_todas_noticias
+from api_gpt_g1 import post_todas_noticias
+from api_gpt_uol import post_todas_noticias_2
 from urllib.parse import unquote
 from login import hash_password, requires_auth
 
@@ -109,6 +110,7 @@ def get_news():
 @app.route('/noticias', methods=['POST'])
 def post_news():
     post_todas_noticias()
+    post_todas_noticias_2()
     
 
 @app.route('/noticias/<titulo>', methods=['GET'])
