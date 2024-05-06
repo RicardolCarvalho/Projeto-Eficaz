@@ -4,7 +4,6 @@ from urllib.parse import urlencode
 
 URL = "http://127.0.0.1:5000"  
 
-
 def tela_login():
     st.title("Login")
     opcao = st.radio("", ['Entrar', 'Cadastrar'])
@@ -21,10 +20,16 @@ def usuario_login():
         r = rq.get(f'{URL}/usuarios')
         response_json = r.json()
         if r.status_code == 200:
+            usuario_encontrado = False
             for usuario in response_json['usuarios']:
                 if usuario['cpf'] == cpf and usuario['senha'] == senha:
                     st.success('Login efetuado com sucesso')
-            else:
+                    st.session_state['role'] = usuario.get('role')
+                    usuario_encontrado = True
+                    break
+            if usuario_encontrado:
+                st.experimental_rerun()
+            if not usuario_encontrado:
                 st.error('CPF ou senha inválidos')
 
                 
@@ -46,7 +51,6 @@ def novo_usuario():
         r = rq.post(f'{URL}/usuarios', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
         if r.status_code == 201:
             st.success('Usuário criado com sucesso')
-
 
 
 def dados_usuario():
@@ -170,22 +174,25 @@ def edita_noticias():
 
 
 st.sidebar.title("Menu")
-lista_de_paginas = ['Home', "Login"]
-page = st.sidebar.radio("", ('Home', "Login", 'Usuários', 'Editar Notícias', 'Atualizar Notícias'))
 
+if 'role' not in st.session_state:
+    page = st.sidebar.radio("", ('Home', "Login"))
+else:
+    if st.session_state['role'] == 'admin':
+        page = st.sidebar.radio("", ('Home', "Login", "Usuários", "Editar Notícias", "Atualizar Notícias"))
+    else:
+        page = st.sidebar.radio("", ('Home', "Login"))
 
 if page == 'Home':
     home()
-
 elif page == 'Login':
     tela_login()
-
-elif page == 'Usuários':   
-    meus_usuarios()
-
+elif page == 'Usuários':
+    if st.session_state['role'] == 'admin':
+        meus_usuarios()
 elif page == 'Editar Notícias':
-    edita_noticias()
-
-
+    if st.session_state['role'] == 'admin':
+        edita_noticias()
 elif page == 'Atualizar Notícias':
-    atualiza_noticias()
+    if st.session_state['role'] == 'admin':
+        atualiza_noticias()
