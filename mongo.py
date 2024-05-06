@@ -132,7 +132,7 @@ def get_new(titulo):
     filtro = {'titulo': titulo}
     projecao = {'_id': 0}
     dados_news = mongo.db.noticias.find_one(filtro, projecao)
-    return {'noticia': dados_news}, 200
+    return dados_news, 200
 
 @app.route('/noticias/<titulo>', methods=['DELETE'])
 @token_required
