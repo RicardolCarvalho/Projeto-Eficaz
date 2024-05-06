@@ -107,6 +107,14 @@ def delete_user(id):
     return {"mensagem": "Usuário deletado com sucesso"}, 200
 
 #-------------------------------------------------------------------------------
+@app.route('/usuarios/a/<cpf>', methods=['GET'])
+def get_user_cpf(cpf):
+    filtro = {'cpf': cpf}
+    projecao = {'_id': 0}
+    dados_user = mongo.db.usuarios.find_one(filtro, projecao)
+    return dados_user, 200
+
+#-------------------------------------------------------------------------------
 @app.route('/noticias', methods=['GET'])
 def get_news():
     filtro = {}
