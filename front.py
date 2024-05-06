@@ -49,7 +49,10 @@ def novo_usuario():
     senha = st.text_input("Senha", type="password")
     if st.button('Criar Usuário'):
         r = rq.post(f'{URL}/usuarios', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
-        if r.status_code == 201:
+
+        print (r)
+
+        if r.status_code == 201 or 200:
             st.success('Usuário criado com sucesso')
 
 
@@ -185,14 +188,18 @@ if 'role' not in st.session_state:
     page = st.sidebar.radio("", ('Home', "Login"))
 else:
     if st.session_state['role'] == 'admin':
-        page = st.sidebar.radio("", ('Home', "Login", "Usuários", "Editar Notícias", "Atualizar Notícias"))
+        page = st.sidebar.radio("", ('Home', "Usuários", "Dados Usuários","Editar Notícias", "Atualizar Notícias"))
+
+    elif st.session_state['role'] == 'user':
+        page = st.sidebar.radio("", ('Home', "Perfil"))
     else:
         page = st.sidebar.radio("", ('Home', "Login"))
 
 if page == 'Home':
     home()
 elif page == 'Login':
-    tela_login()
+    if 'role' not in st.session_state:
+        tela_login()
 elif page == 'Usuários':
     if st.session_state['role'] == 'admin':
         meus_usuarios()
@@ -203,5 +210,6 @@ elif page == 'Atualizar Notícias':
     if st.session_state['role'] == 'admin':
         atualiza_noticias()
 
-
-
+elif page == 'Dados Usuários':
+    if st.session_state['role'] == 'admin':
+        dados_usuario()
