@@ -2,10 +2,20 @@ import streamlit as st
 import requests as rq
 from urllib.parse import urlencode
 
+
 URL = "http://127.0.0.1:5000"  
 
+def centered_image(image):
+    container = st.empty()
+    container.image(image, width=150, )
+
+image = 'Infoly.png'
+
+centered_image(image)
+
+
 def tela_login():
-    st.title("Login")
+    st.header("Login")
     opcao = st.radio("", ['Entrar', 'Cadastrar'])
     if opcao == 'Entrar':
         usuario_login()
@@ -13,7 +23,7 @@ def tela_login():
         novo_usuario()
 
 def usuario_login():
-    st.title("Entrar")
+    st.header("Entrar")
     cpf = st.text_input("CPF")
     senha = st.text_input("Senha", type="password")
     if st.button('Login'):
@@ -35,14 +45,15 @@ def usuario_login():
                 
 
 def meus_usuarios():
-    st.title("Usuários")
+    
+    st.header("Usuários")
     r = rq.get(f'{URL}/usuarios')
     status = r.status_code
     if status == 200:
         st.table(r.json()["usuarios"])
 
 def novo_usuario():
-    st.title("Cadastrar")
+    st.header("Cadastrar")
     cpf = st.text_input("CPF")
     email = st.text_input("Email")
     nome = st.text_input("Nome")
@@ -54,7 +65,7 @@ def novo_usuario():
 
 
 def dados_usuario():
-    st.title("Dados Usuário")
+    st.header("Dados Usuário")
     id = st.text_input('Id do usuário')
     if st.button('Buscar Usuário'):
         r = rq.get(f'{URL}/usuarios/{id}')
@@ -89,14 +100,14 @@ def home():
 
         for noticia in noticias:
             if tipo_selecionado == 'Todos' or noticia['tipo'] == tipo_selecionado:
-                st.title(noticia['titulo'])
+                st.header(noticia['titulo'])
                 st.write(noticia['tipo'])
                 st.write(noticia['conteudo'])
                 st.write(noticia['data'])
                 st.write("-------------------------------------------------")
 
 def atualiza_noticias():
-    st.title('Atualizar Notícias Diárias')
+    st.header('Atualizar Notícias Diárias')
 
     if st.button('Atualizar'):
         r = rq.post(f'{URL}/noticias')  
@@ -107,7 +118,7 @@ def atualiza_noticias():
             st.error('Erro ao atualizar notícias')
 
 def edita_noticias():
-    st.title('Editar Notícias')
+    st.header('Editar Notícias')
     
     if 'noticia' not in st.session_state:
         st.session_state['noticia'] = None
@@ -173,7 +184,7 @@ def edita_noticias():
 
 
 
-st.sidebar.title("Menu")
+st.sidebar.header("Menu")
 
 if 'role' not in st.session_state:
     page = st.sidebar.radio("", ('Home', "Login"))
@@ -196,3 +207,6 @@ elif page == 'Editar Notícias':
 elif page == 'Atualizar Notícias':
     if st.session_state['role'] == 'admin':
         atualiza_noticias()
+
+
+
