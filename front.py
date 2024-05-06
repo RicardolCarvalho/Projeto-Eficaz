@@ -34,6 +34,7 @@ def usuario_login():
             for usuario in response_json['usuarios']:
                 if usuario['cpf'] == cpf and usuario['senha'] == senha:
                     st.success('Login efetuado com sucesso')
+                    st.session_state['cpf'] = cpf
                     st.session_state['role'] = usuario.get('role')
                     usuario_encontrado = True
                     break
@@ -60,22 +61,65 @@ def novo_usuario():
     senha = st.text_input("Senha", type="password")
     if st.button('Criar Usuário'):
         r = rq.post(f'{URL}/usuarios', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
-        if r.status_code == 201:
+
+        print (r)
+
+        if r.status_code == 201 or 200:
             st.success('Usuário criado com sucesso')
 
+def perfil():
+    st.title("Perfil")
+    cpf = st.session_state['cpf']
+    r = rq.get(f'{URL}/usuarios/a/{cpf}')
+    if r.status_code == 200:
+        try:
+            response_json = r.json()
+        except ValueError:
+            st.error('Erro ao decodificar resposta JSON.')
+    else:
+        st.error(f'Erro na requisição: {r.status_code}')
+    if r.status_code == 200:
+        st.session_state['Usuario'] = response_json
+    if 'Usuario' in st.session_state:
+        usuario = st.session_state['Usuario']
+        cpf = st.text_input("CPF", value=usuario['cpf'])
+        email = st.text_input("Email", value=usuario['email'])
+        nome = st.text_input("Nome", value=usuario['nome'])
+        senha = st.text_input("Senha", type="password", value=usuario['senha'])
+
+        st.table(usuario)
+        if st.button('Atualizar Usuário'):
+            r = rq.put(f'{URL}/usuarios/{cpf}', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
+            if r.status_code == 200:
+                st.success('Usuário atualizado com sucesso')
+#______________________________________________________ 
 
 def dados_usuario():
     st.header("Dados Usuário")
-    id = st.text_input('Id do usuário')
+    id = st.text_input('ID do usuário')
     if st.button('Buscar Usuário'):
         r = rq.get(f'{URL}/usuarios/{id}')
-        st.table(r.json())
-        st.session_state['Usuario'] = r.json()
+        response_json = None
+        if r.status_code == 200:
+            try:
+                response_json = r.json()
+            except ValueError:
+                st.error('Erro ao decodificar resposta JSON.')
+        else:
+            st.error(f'Erro na requisição: {r.status_code}')
+        if r.status_code == 200:
+            for usuario in response_json['usuarios']:
+                if usuario['id'] == id:
+                    st.session_state['Usuario'] = usuario
+                    break
     if 'Usuario' in st.session_state:
-        cpf = st.text_input("CPF")
-        email = st.text_input("Email")
-        nome = st.text_input("Nome")
-        senha = st.text_input("Senha", type="password")
+        usuario = st.session_state['Usuario']
+        cpf = st.text_input("CPF", value=usuario['cpf'])
+        email = st.text_input("Email", value=usuario['email'])
+        nome = st.text_input("Nome", value=usuario['nome'])
+        senha = st.text_input("Senha", type="password", value=usuario['senha'])
+
+        st.table(usuario)
         if st.button('Atualizar Usuário'):
             r = rq.put(f'{URL}/usuarios/{id}', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
             if r.status_code == 200:
@@ -98,13 +142,18 @@ def home():
         tipos = list(set(noticia['tipo'] for noticia in noticias)) 
         tipo_selecionado = st.selectbox('Filtrar por tipo de notícia:', ['Todos'] + tipos)
 
+        portais = list(set(noticia['portal'] for noticia in noticias))
+        portal_selecionado = st.selectbox('Filtrar por portal:', ['Todos'] + portais)
+
         for noticia in noticias:
             if tipo_selecionado == 'Todos' or noticia['tipo'] == tipo_selecionado:
-                st.header(noticia['titulo'])
-                st.write(noticia['tipo'])
-                st.write(noticia['conteudo'])
-                st.write(noticia['data'])
-                st.write("-------------------------------------------------")
+                if portal_selecionado == 'Todos' or noticia['portal'] == portal_selecionado:
+                    st.header(noticia['titulo'])
+                    st.write(noticia['tipo'])
+                    st.write(noticia['conteudo'])
+                    st.write(noticia['data'])
+                    st.write(noticia["portal"])
+                    st.write("-------------------------------------------------")
 
 def atualiza_noticias():
     st.header('Atualizar Notícias Diárias')
@@ -190,14 +239,18 @@ if 'role' not in st.session_state:
     page = st.sidebar.radio("", ('Home', "Login"))
 else:
     if st.session_state['role'] == 'admin':
-        page = st.sidebar.radio("", ('Home', "Login", "Usuários", "Editar Notícias", "Atualizar Notícias"))
+        page = st.sidebar.radio("", ('Home', "Usuários", "Dados Usuários","Editar Notícias", "Atualizar Notícias", "Perfil"))
+
+    elif st.session_state['role'] == 'user':
+        page = st.sidebar.radio("", ('Home', "Perfil"))
     else:
         page = st.sidebar.radio("", ('Home', "Login"))
 
 if page == 'Home':
     home()
 elif page == 'Login':
-    tela_login()
+    if 'role' not in st.session_state:
+        tela_login()
 elif page == 'Usuários':
     if st.session_state['role'] == 'admin':
         meus_usuarios()
@@ -207,6 +260,10 @@ elif page == 'Editar Notícias':
 elif page == 'Atualizar Notícias':
     if st.session_state['role'] == 'admin':
         atualiza_noticias()
-
-
+elif page == 'Dados Usuários':
+    if st.session_state['role'] == 'admin':
+        dados_usuario()
+elif page == 'Perfil':
+    if st.session_state['role'] == 'user' or 'admin':
+        perfil()
 
