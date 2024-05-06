@@ -82,15 +82,14 @@ def post_users():
     mongo.db.usuarios.insert_one(user_data)
     return {"token": token, "id": user_data['id']}, 201
 
-@app.route('/usuarios/<id>', methods=['GET'])
+@app.route('/usuarios/<int:id>', methods=['GET'])
 def get_user(id):
     filtro = {'id':id}
     projecao = {'_id': 0}
     dados_user = mongo.db.usuarios.find_one(filtro, projecao)
-    return dados_user, 200
+    return {'usuarios': dados_user}, 200
 
-@app.route('/usuarios/<id>', methods=['PUT'])
-@token_required
+@app.route('/usuarios/<int:id>', methods=['PUT'])
 def put_user(id):
     data = request.json
     if not mongo.db.usuarios.find_one({"id": id}):
@@ -98,8 +97,7 @@ def put_user(id):
     mongo.db.usuarios.update_one({"id": id}, {"$set": data})
     return {"mensagem": "Alteração realizada com sucesso"}, 200
 
-@app.route('/usuarios/<id>', methods=['DELETE'])
-@token_required
+@app.route('/usuarios/<int:id>', methods=['DELETE'])
 def delete_user(id):
     if not mongo.db.usuarios.find_one({"id": id}):
         return {"erro": "Usuário não encontrado"}, 404
@@ -134,7 +132,7 @@ def get_new(titulo):
     filtro = {'titulo': titulo}
     projecao = {'_id': 0}
     dados_news = mongo.db.noticias.find_one(filtro, projecao)
-    return dados_news, 200
+    return {'noticia': dados_news}, 200
 
 @app.route('/noticias/<titulo>', methods=['DELETE'])
 @token_required

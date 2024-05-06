@@ -82,23 +82,24 @@ def perfil():
         st.session_state['Usuario'] = response_json
     if 'Usuario' in st.session_state:
         usuario = st.session_state['Usuario']
+        print(usuario)
         cpf = st.text_input("CPF", value=usuario['cpf'])
         email = st.text_input("Email", value=usuario['email'])
         nome = st.text_input("Nome", value=usuario['nome'])
         senha = st.text_input("Senha", type="password", value=usuario['senha'])
-
+        id = usuario['id']
         st.table(usuario)
         if st.button('Atualizar Usuário'):
-            r = rq.put(f'{URL}/usuarios/{cpf}', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
+            r = rq.put(f'{URL}/usuarios/{id}', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
             if r.status_code == 200:
                 st.success('Usuário atualizado com sucesso')
 #______________________________________________________ 
 
 def dados_usuario():
     st.header("Dados Usuário")
-    id = st.text_input('ID do usuário')
+    idd = st.text_input('ID do usuário')
     if st.button('Buscar Usuário'):
-        r = rq.get(f'{URL}/usuarios/{id}')
+        r = rq.get(f'{URL}/usuarios/{idd}')
         response_json = None
         if r.status_code == 200:
             try:
@@ -108,12 +109,11 @@ def dados_usuario():
         else:
             st.error(f'Erro na requisição: {r.status_code}')
         if r.status_code == 200:
-            for usuario in response_json['usuarios']:
-                if usuario['id'] == id:
-                    st.session_state['Usuario'] = usuario
-                    break
+            st.session_state['Usuario'] = response_json
+    # print(st.session_state)
     if 'Usuario' in st.session_state:
         usuario = st.session_state['Usuario']
+        usuario = usuario['usuarios']
         cpf = st.text_input("CPF", value=usuario['cpf'])
         email = st.text_input("Email", value=usuario['email'])
         nome = st.text_input("Nome", value=usuario['nome'])
@@ -121,11 +121,11 @@ def dados_usuario():
 
         st.table(usuario)
         if st.button('Atualizar Usuário'):
-            r = rq.put(f'{URL}/usuarios/{id}', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
+            r = rq.put(f'{URL}/usuarios/{idd}', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
             if r.status_code == 200:
                 st.success('Usuário atualizado com sucesso')
         if st.button('Apagar Usuário'):
-            r = rq.delete(f'{URL}/usuarios/{id}')
+            r = rq.delete(f'{URL}/usuarios/{idd}')
             if r.status_code == 204:
                 st.success('Usuário apagado com sucesso')
 
