@@ -24,6 +24,7 @@ def usuario_login():
             for usuario in response_json['usuarios']:
                 if usuario['cpf'] == cpf and usuario['senha'] == senha:
                     st.success('Login efetuado com sucesso')
+                    st.session_state['cpf'] = cpf
                     st.session_state['role'] = usuario.get('role')
                     usuario_encontrado = True
                     break
@@ -55,24 +56,19 @@ def novo_usuario():
         if r.status_code == 201 or 200:
             st.success('Usuário criado com sucesso')
 
-def dados_usuario():
-    st.title("Dados Usuário")
-    cpf = st.text_input('CPF do usuário')
-    if st.button('Buscar Usuário'):
-        r = rq.get(f'{URL}/usuarios/{cpf}')
-        response_json = None
-        if r.status_code == 200:
-            try:
-                response_json = r.json()
-            except ValueError:
-                st.error('Erro ao decodificar resposta JSON.')
-        else:
-            st.error(f'Erro na requisição: {r.status_code}')
-        if r.status_code == 200:
-            for usuario in response_json['usuarios']:
-                if usuario['cpf'] == cpf:
-                    st.session_state['Usuario'] = usuario
-                    break
+def perfil():
+    st.title("Perfil")
+    cpf = st.session_state['cpf']
+    r = rq.get(f'{URL}/usuarios/a/{cpf}')
+    if r.status_code == 200:
+        try:
+            response_json = r.json()
+        except ValueError:
+            st.error('Erro ao decodificar resposta JSON.')
+    else:
+        st.error(f'Erro na requisição: {r.status_code}')
+    if r.status_code == 200:
+        st.session_state['Usuario'] = response_json
     if 'Usuario' in st.session_state:
         usuario = st.session_state['Usuario']
         cpf = st.text_input("CPF", value=usuario['cpf'])
@@ -85,8 +81,40 @@ def dados_usuario():
             r = rq.put(f'{URL}/usuarios/{cpf}', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
             if r.status_code == 200:
                 st.success('Usuário atualizado com sucesso')
+#______________________________________________________ 
+
+def dados_usuario():
+    st.title("Dados Usuário")
+    id = st.text_input('ID do usuário')
+    if st.button('Buscar Usuário'):
+        r = rq.get(f'{URL}/usuarios/{id}')
+        response_json = None
+        if r.status_code == 200:
+            try:
+                response_json = r.json()
+            except ValueError:
+                st.error('Erro ao decodificar resposta JSON.')
+        else:
+            st.error(f'Erro na requisição: {r.status_code}')
+        if r.status_code == 200:
+            for usuario in response_json['usuarios']:
+                if usuario['id'] == id:
+                    st.session_state['Usuario'] = usuario
+                    break
+    if 'Usuario' in st.session_state:
+        usuario = st.session_state['Usuario']
+        cpf = st.text_input("CPF", value=usuario['cpf'])
+        email = st.text_input("Email", value=usuario['email'])
+        nome = st.text_input("Nome", value=usuario['nome'])
+        senha = st.text_input("Senha", type="password", value=usuario['senha'])
+
+        st.table(usuario)
+        if st.button('Atualizar Usuário'):
+            r = rq.put(f'{URL}/usuarios/{id}', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
+            if r.status_code == 200:
+                st.success('Usuário atualizado com sucesso')
         if st.button('Apagar Usuário'):
-            r = rq.delete(f'{URL}/usuarios/{cpf}')
+            r = rq.delete(f'{URL}/usuarios/{id}')
             if r.status_code == 204:
                 st.success('Usuário apagado com sucesso')
 
@@ -201,7 +229,7 @@ if 'role' not in st.session_state:
     page = st.sidebar.radio("", ('Home', "Login"))
 else:
     if st.session_state['role'] == 'admin':
-        page = st.sidebar.radio("", ('Home', "Usuários", "Dados Usuários","Editar Notícias", "Atualizar Notícias"))
+        page = st.sidebar.radio("", ('Home', "Usuários", "Dados Usuários","Editar Notícias", "Atualizar Notícias", "Perfil"))
 
     elif st.session_state['role'] == 'user':
         page = st.sidebar.radio("", ('Home', "Perfil"))
@@ -222,9 +250,9 @@ elif page == 'Editar Notícias':
 elif page == 'Atualizar Notícias':
     if st.session_state['role'] == 'admin':
         atualiza_noticias()
-elif page == 'Dados Usuário':
-    dados_usuario()
-
 elif page == 'Dados Usuários':
     if st.session_state['role'] == 'admin':
         dados_usuario()
+elif page == 'Perfil':
+    if st.session_state['role'] == 'user' or 'admin':
+        perfil()
