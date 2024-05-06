@@ -87,13 +87,19 @@ def home():
         tipos = list(set(noticia['tipo'] for noticia in noticias)) 
         tipo_selecionado = st.selectbox('Filtrar por tipo de notícia:', ['Todos'] + tipos)
 
+        portais = list(set(noticia['portal'] for noticia in noticias))
+        portal_selecionado = st.selectbox('Filtrar por portal:', ['Todos'] + portais)
+
         for noticia in noticias:
             if tipo_selecionado == 'Todos' or noticia['tipo'] == tipo_selecionado:
-                st.title(noticia['titulo'])
-                st.write(noticia['tipo'])
-                st.write(noticia['conteudo'])
-                st.write(noticia['data'])
-                st.write("-------------------------------------------------")
+                if portal_selecionado == 'Todos' or noticia['portal'] == portal_selecionado:
+                    
+                    st.title(noticia['titulo'])
+                    st.write(noticia['tipo'])
+                    st.write(noticia['conteudo'])
+                    st.write(noticia['data'])
+                    st.write(noticia["portal"])
+                    st.write("-------------------------------------------------")
 
 def atualiza_noticias():
     st.title('Atualizar Notícias Diárias')
@@ -196,3 +202,6 @@ elif page == 'Editar Notícias':
 elif page == 'Atualizar Notícias':
     if st.session_state['role'] == 'admin':
         atualiza_noticias()
+
+
+
