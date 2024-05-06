@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 
 URL = "http://127.0.0.1:5000"  
 
+
 def tela_login():
     st.title("Login")
     opcao = st.radio("", ['Entrar', 'Cadastrar'])
@@ -45,6 +46,7 @@ def novo_usuario():
         r = rq.post(f'{URL}/usuarios', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
         if r.status_code == 201:
             st.success('Usuário criado com sucesso')
+
 
 
 def dados_usuario():
@@ -168,7 +170,9 @@ def edita_noticias():
 
 
 st.sidebar.title("Menu")
-page = st.sidebar.radio("", ('Home', "Login", "Usuários", "Editar Notícias", "Atualizar Notícias"))
+lista_de_paginas = ['Home', "Login"]
+page = st.sidebar.radio("", ('Home', "Login", 'Usuários', 'Editar Notícias', 'Atualizar Notícias'))
+
 
 if page == 'Home':
     home()
