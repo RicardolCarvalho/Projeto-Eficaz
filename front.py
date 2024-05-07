@@ -62,7 +62,6 @@ def novo_usuario():
     if st.button('Criar Usuário'):
         r = rq.post(f'{URL}/usuarios', json={"cpf": cpf, "nome": nome, "email": email, "senha": senha})
 
-        print (r)
 
         if r.status_code == 201 or 200:
             st.success('Usuário criado com sucesso')
@@ -110,7 +109,7 @@ def dados_usuario():
             st.error(f'Erro na requisição: {r.status_code}')
         if r.status_code == 200:
             st.session_state['Usuario'] = response_json
-    # print(st.session_state)
+
     if 'Usuario' in st.session_state:
         usuario = st.session_state['Usuario']
         usuario = usuario['usuarios']
@@ -126,20 +125,27 @@ def dados_usuario():
                 st.success('Usuário atualizado com sucesso')
         if st.button('Apagar Usuário'):
             r = rq.delete(f'{URL}/usuarios/{idd}')
-            if r.status_code == 204:
+            if r.status_code == 204 or 200:
                 st.success('Usuário apagado com sucesso')
 
 #______________________________________________________
+
 
 def home():
     r = rq.get(f'{URL}/noticias')  
 
     if r.status_code == 200:
         resposta_json = r.json()
-        
         noticias = resposta_json["noticias"]
 
-        tipos = list(set(noticia['tipo'] for noticia in noticias)) 
+
+        for noticia in noticias:
+            dia, mes, ano = noticia['data'].split('/')
+            noticia['data_formatada'] = f'{ano}-{mes}-{dia}'
+
+        noticias = sorted(noticias, key=lambda x: x['data_formatada'], reverse=True)
+
+        tipos = list(set(noticia['tipo'] for noticia in noticias))
         tipo_selecionado = st.selectbox('Filtrar por tipo de notícia:', ['Todos'] + tipos)
 
         portais = list(set(noticia['portal'] for noticia in noticias))
@@ -151,9 +157,10 @@ def home():
                     st.header(noticia['titulo'])
                     st.write(noticia['tipo'])
                     st.write(noticia['conteudo'])
-                    st.write(noticia['data'])
+                    st.write(noticia['data'])  
                     st.write(noticia["portal"])
                     st.write("-------------------------------------------------")
+
 
 def atualiza_noticias():
     st.header('Atualizar Notícias Diárias')
@@ -162,7 +169,7 @@ def atualiza_noticias():
         r = rq.post(f'{URL}/noticias')  
 
         if r.status_code == 200 or 201:
-            st.success('Notícias atualizadas com sucesso')
+            st.success('Não feche o navegador, atualizando notícias...')
         else:
             st.error('Erro ao atualizar notícias')
 
